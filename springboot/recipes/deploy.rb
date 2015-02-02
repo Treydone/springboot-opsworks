@@ -19,7 +19,7 @@ node[:deploy].each do |application, deploy|
     user 'root'
     cwd "#{deploy[:deploy_to]}/current"
     code <<-EOH
-        update-alternatives --set java $(update-alternatives --display java | grep -v esclave | grep 1.8.0 | awk '{print $1}')
+        yum remove java-1.7.0-openjdk* -y
     EOH
   end
 
