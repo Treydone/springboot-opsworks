@@ -37,11 +37,12 @@ node[:deploy].each do |application, deploy|
   
   java_opts = node['springboot']['java_opts']
   log_file = node['springboot']['log_file']
+  port = node['springboot']['port']
   bash 'SpringBoot: Running the deployed' do
     user "root"
     cwd "#{deploy[:deploy_to]}/current"
     code <<-EOH
-        java #{java_opts} -Dlogging.file="#{log_file}" -jar *.jar > /dev/null 2>&1 &
+        java #{java_opts} -Dlogging.file="#{log_file}" -Dserver.port=#{port} -jar *.jar > /dev/null 2>&1 &
     EOH
   end
   
