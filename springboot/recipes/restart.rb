@@ -1,22 +1,18 @@
-Chef::Log.info("DEPLOY: Before restart")
-
 node[:deploy].each do |application, deploy|
   
-  opsworks_deploy_dir do
+  opsworks_deploy_dir 'SpringBoot: Preparing the deployment dir' do
     user deploy[:user]
     group deploy[:group]
     path deploy[:deploy_to]
   end
 
-  opsworks_deploy do
+  opsworks_deploy 'SpringBoot: Deploying the app' do
     deploy_data deploy
     app application
   end
   
-  script "install_composer" do
-    Chef::Log.info("DEPLOY: Shutting down the current running")
-    interpreter "bash"
-    user "root"
+  bash 'SpringBoot: Shutting down the current running' do
+    user 'root'
     cwd "#{deploy[:deploy_to]}/current"
     code <<-EOH
         curl -XPOST "http://localhost:8080/admin/shutdown" > /var/log/app.log 2>&1 || : 
@@ -31,14 +27,15 @@ node[:deploy].each do |application, deploy|
     EOH
   end
   
-  script "runjar" do
-    Chef::Log.info("DEPLOY: Running the deployed")
-    interpreter "bash"
+  bash 'SpringBoot: Running the deployed' do
     user "root"
     cwd "#{deploy[:deploy_to]}/current"
     code <<-EOH
         java -jar *.jar > /var/log/app.log 2>&1 &
     EOH
   end
+  
 end
+
+
 
